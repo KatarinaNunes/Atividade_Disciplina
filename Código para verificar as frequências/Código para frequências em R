@@ -1,0 +1,41 @@
+#Conversão do arquivo VCF contendo as Amostras para o formato Plink 
+
+plink --vcf IND.vcf --make-bed --out IND_plink 
+ 
+-> Como resultado, obtivemos três arquivos : IND_plink.fam , IND_plink.bed e IND_plink.bim;
+
+#Cálculo de frequência alélica utilizando o Plink (v1.9)
+
+plink --bfile IND_plink --from-bp 117287120 --to-bp 117715971 --freq  --make-bed --out freq_plink
+
+-> Utilizamos as coordenadas genômicas do CFTR para gerar a frequência exata no arquivo de saída “freq_plink.frq”
+
+-> 1º Etapa : Carregamento do arquivo e remoção de dados ausentes (NA)
+
+data_3 <- read.csv("freq_plink.frq", header = TRUE, sep = "")
+data3_semna <- na.omit(data_3)
+
+-> 2º Etapa : Construção de um Data Frame com os dados
+
+tabela_variantes <- data.frame(data3_semna)
+
+-> 3º Etapa : Filtragem das variantes (raras - F < 0.01  e comuns F > 0.01 
+
+
+var2 <- variantes_maiores_0.01 <- subset(tabela_variantes, tabela_variantes$MAF > 0.01)
+
+var3 <- variantes_menores_0.01 <- subset(tabela_variantes, tabela_variantes$MAF < 0.01)
+
+-> 4º Etapa : Criação de dataframe com as quantidades de variantes raras e comuns
+
+
+data_variantes <- data.frame(
+                  Variants = c("Rares", "Common"),
+                   Quantity = c(214 , 35)
+                  )
+     
+
+data_var2 <- data.frame(
+            Variants_frequency = c("F>0.01", "F<0.01"),
+            Quantity = c(35 , 214)
+            )
